@@ -1,1 +1,235 @@
+<!DOCTYPE html>
+<html lang="en-US">
 
+<head>
+    <meta charset="utf-8">
+    <title>Earthquake List</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+    <!-- Including the Mapbox GL CSS file -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
+
+    <!-- Including the Mapbox GL JS file -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
+
+    <style>
+        /* CSS styles for the layout and components */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #container {
+            display: flex;
+            height: 100vh;
+            flex-direction: row;
+            align-items: stretch;
+        }
+
+        #side-panel {
+            flex-basis: 450px;
+            overflow-y: scroll;
+        }
+
+        #map {
+            flex-grow: 1;
+        }
+
+        button {
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 16px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #D3D3D3;
+        }
+
+        /* Hide the side panel when the screen width is below 1024px */
+        @media screen and (max-width: 1023px) {
+            #side-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main id="container">
+        <div id="side-panel">
+
+            <h2>Link Light Rail Stations</h2>
+            <button>Sort by Ridership</button>
+
+            <table>
+                <tr>
+                    <th>name</th>
+                    <th>ridership</th>
+                    <th>coordinates</th>
+                </tr>
+            </table>
+
+        </div>
+        <div id="map"></div>
+
+    </main>
+    <script>
+        // Define the Mapbox access token
+        mapboxgl.accessToken =
+            'pk.eyJ1Ijoiem5pdTU5IiwiYSI6ImNsanZ0bG9tajAwdnIzZW9kN3JjdG9qaXkifQ.WBBEK_NbY13kfFpWGUG6kQ';
+
+        // Create the map object
+        let map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/satellite-v9', // style URL
+            zoom: 9.7, // starting zoom
+            center: [-122.3, 47.6] // starting center
+        });
+
+
+        async function geojsonFetch() {
+
+            let response, link, line, jurisdiction, table;
+            response = await fetch('assets/link.geojson');
+            link = await response.json();
+            response = await fetch('assets/line.geojson');
+            line = await response.json();
+            response = await fetch('assets/jurisdiction.geojson');
+            jurisdiction = await response.json();
+
+        table = document.getElementsByTagName("table")[0];
+        let row, cell1, cell2, cell3;
+
+        for (let i = 0; i < link.features.length; i++) {
+            const feature = link.features[i];
+  
+        // Extract the properties from the GeoJSON feature
+            const name = feature.properties.name;
+            const ridership = feature.properties.ridership;
+            const coordinates = feature.geometry.coordinates;
+  
+        // Create an empty <tr> element and add it to the 1st position of the table:
+        row = table.insertRow(-1);
+        cell1 = row.insertCell(0);
+        cell2 = row.insertCell(1);
+        cell3 = row.insertCell(2);
+  
+        // Set the values for each cell in the table
+        cell1.innerHTML = name;
+        cell2.innerHTML = ridership;
+        cell3.innerHTML = `Lng: ${coordinates[0]}, Lat: ${coordinates[1]}`;
+        }
+
+            //load data to the map as new layers and table on the side.
+            map.on('load', function loadingData() {
+
+
+                map.addSource('line', {
+                    type: 'geojson',
+                    data: line
+                });
+
+                map.addLayer({
+                    'id': 'link-line-layer',
+                    'type': 'line',
+                    'source': 'line',
+                    'paint': {
+                        'line-color': 'black',
+                        'line-width': 8
+                    }
+                });
+
+                map.addSource('link', {
+                    type: 'geojson',
+                    data: link
+                });
+
+                map.addLayer({
+                    'id': 'link-layer',
+                    'type': 'circle',
+                    'source': 'link',
+                    'paint': {
+                        'circle-radius': 8,
+                        'circle-stroke-width': 2,
+                        'circle-color': 'orange',
+                        'circle-stroke-color': 'white'
+                    }
+                });
+
+
+                map.addSource('jurisdiction', {
+                    type: 'geojson',
+                    data: jurisdiction
+                });
+
+                map.addLayer({
+                    'id': 'jurisdiction-layer',
+                    'type': 'fill',
+                    'source': 'jurisdiction',
+                    'paint': {
+                        'fill-color': '#0080ff', // blue color fill
+                        'fill-opacity': 0.5
+                    }
+                });
+
+            });
+
+        }
+
+        geojsonFetch();
+
+        let btn = document.getElementsByTagName("button")[0];
+
+        btn.addEventListener('click', sortTable);
+
+        // define the function to sort table
+        function sortTable(e) {
+            let table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementsByTagName("table")[0];
+            switching = true;
+            /*Make a loop that will continue until
+            no switching has been done:*/
+            while (switching) {
+                //start by saying: no switching is done:
+                switching = false;
+                rows = table.rows;
+                /*Loop through all table rows (except the
+                first, which contains table headers):*/
+                for (i = 1; i < (rows.length - 1); i++) {
+                    //start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /*Get the two elements you want to compare,
+                    one from current row and one from the next:*/
+                    x = parseFloat(rows[i].getElementsByTagName("td")[1].innerHTML);
+                    y = parseFloat(rows[i + 1].getElementsByTagName("td")[1].innerHTML);
+                    //check if the two rows should switch place:
+                    if (x < y) {
+                        //if so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (shouldSwitch) {
+                    /*If a switch has been marked, make the switch
+                    and mark that a switch has been done:*/
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>
