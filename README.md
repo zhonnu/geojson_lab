@@ -15,7 +15,7 @@ This is the lab 3 assignment of GEOG 328 in SUMMER 2023.
 ## Data Sources
 The GeoJSON data used for the rail lines and stations is sourced from Sound Transit.
 
-- link.geojson: GeoJSON data for the stations, including their names, coordinates, and ridership data.
+- link.geojson: GeoJSON data for the stations, including their names, coordinates, and ridership data (daily average in May 2023).
 - line.geojson: GeoJSON data for the rail lines, including the coordinates for the line paths.
 - jurisdiction.geojson: GeoJSON data for the Seattle jurisdiction boundaries.
 
