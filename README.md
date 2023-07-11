@@ -20,10 +20,10 @@ The GeoJSON data used for the rail lines and stations is sourced from Sound Tran
 - jurisdiction.geojson: GeoJSON data for the Seattle jurisdiction boundaries.
 
 ## Technologies Used
-Mapbox GL JS: A JavaScript library for interactive, customizable maps.
-HTML: The structure and markup of the web application.
-CSS: The styles and layout of the web application.
-JavaScript: Handling data fetching, manipulation, and map interactions.
+- Mapbox GL JS: A JavaScript library for interactive, customizable maps.
+- HTML: The structure and markup of the web application.
+- CSS: The styles and layout of the web application.
+- JavaScript: Handling data fetching, manipulation, and map interactions.
 
 ## License
 This project is licensed under the MIT License.
