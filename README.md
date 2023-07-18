@@ -30,3 +30,4 @@ This project is licensed under the MIT License.
 
 ## Acknowledgements
 Sound Transit: For providing the GeoJSON data of the Sound Transit Link Light Rail system.
+https://github.com/seattleio/seattle-boundaries-data/blob/master/data/city-limits.geojson: For providing GeoJSON data for Seattle city limit. 
